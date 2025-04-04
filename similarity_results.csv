@@ -1,0 +1,29 @@
+Image 1,Image 2,Similarity (%)
+hs1.jpg,hs2.jpg,93.8199
+hs1.jpg,hs3.jpg,81.663864
+hs1.jpg,hs4 copy.jpg,78.29527
+hs1.jpg,hs4.jpg,78.29527
+hs1.jpg,hs5 copy.jpg,83.98866
+hs1.jpg,hs5.jpg,83.98866
+hs1.jpg,hs6.jpg,80.49587
+hs2.jpg,hs3.jpg,83.28359
+hs2.jpg,hs4 copy.jpg,80.03829
+hs2.jpg,hs4.jpg,80.03829
+hs2.jpg,hs5 copy.jpg,82.71234
+hs2.jpg,hs5.jpg,82.71234
+hs2.jpg,hs6.jpg,81.65135
+hs3.jpg,hs4 copy.jpg,89.08322
+hs3.jpg,hs4.jpg,89.08322
+hs3.jpg,hs5 copy.jpg,91.640564
+hs3.jpg,hs5.jpg,91.640564
+hs3.jpg,hs6.jpg,85.44266
+hs4 copy.jpg,hs4.jpg,100.0
+hs4 copy.jpg,hs5 copy.jpg,96.172356
+hs4 copy.jpg,hs5.jpg,96.172356
+hs4 copy.jpg,hs6.jpg,80.828964
+hs4.jpg,hs5 copy.jpg,96.172356
+hs4.jpg,hs5.jpg,96.172356
+hs4.jpg,hs6.jpg,80.828964
+hs5 copy.jpg,hs5.jpg,100.0
+hs5 copy.jpg,hs6.jpg,82.79621
+hs5.jpg,hs6.jpg,82.79621
