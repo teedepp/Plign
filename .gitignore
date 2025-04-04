@@ -1,0 +1,30 @@
+# Ignore image files
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.svg
+*.ico
+*.tif
+*.tiff
+*.webp
+
+# Ignore PDF files
+*.pdf
+
+# Ignore CSV files
+*.csv
+
+# Environment files with sensitive data
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.env
+.env.*
+
+# Other common files to ignore
+node_modules/
+.DS_Store
