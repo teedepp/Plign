@@ -1,43 +1,44 @@
-# Import Libraries
-from paddleocr import PaddleOCR
+import os
 import cv2
-import numpy as np
-import requests
 import json
+import requests
+from paddleocr import PaddleOCR
 
-# OpenRouter API Key
-API_KEY = "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"
-
-# Initialize PaddleOCR
+# Setup
+API_KEY = "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"
 ocr = PaddleOCR(use_angle_cls=True, lang="en")
 
-# Function: Preprocess Image
+input_folder = "assignments_processed"
+output_folder = "assignments_texts"
+
+# Preprocessing
 def preprocess_image(image_path):
-    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)  # Convert to grayscale
-    img = cv2.GaussianBlur(img, (5,5), 0)  # Reduce noise
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    img = cv2.GaussianBlur(img, (5, 5), 0)
     img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                cv2.THRESH_BINARY, 11, 2)  # Enhance text contrast
+                                cv2.THRESH_BINARY, 11, 2)
     return img
 
-# Function: Perform OCR - Preserving Structure
+# OCR
 def extract_text(image_path):
     result = ocr.ocr(image_path, cls=True)
-    
-    # Preserve the line structure
-    structured_text = []
-    for line in result:
-        line_text = []
-        for word in line:
-            line_text.append(word[1][0])  # Extract recognized text
-        structured_text.append(" ".join(line_text))  # Join words in each line
-    
-    # Return both structured and flat versions
-    return {
-        "structured": structured_text,  # List of lines
-        "flat": " ".join(structured_text)  # Single string for LLM processing
-    }
+    extracted_text = []
 
-# Function: Correct Text using DeepSeek R1
+    if result is None:
+        print(f"[Warning] No OCR result for: {image_path}")
+        return ""
+
+    for line in result:
+        if line is None:
+            continue
+        for word in line:
+            if word is not None:
+                extracted_text.append(word[1][0])
+
+    return "\n".join(extracted_text)
+
+
+# LLM Correction
 def correct_text_with_deepseek(ocr_text):
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
@@ -45,53 +46,44 @@ def correct_text_with_deepseek(ocr_text):
         "Content-Type": "application/json",
     }
 
-    prompt = """
-    There is some ambiguity and spelling mistakes in the following text. 
-    Correct the spelling mistakes while keeping the context in mind. 
-    Preserve the original line structure by separating lines with newline characters.
-    Just provide the corrected text without additional comments:
-
-    {text}
-    """
-
     payload = {
-        "model": "deepseek/deepseek-chat-v3-0324:free",
+        "model": "meta-llama/llama-3.2-3b-instruct:free",
         "messages": [
             {
                 "role": "user",
-                "content": prompt.format(text=ocr_text)
+                "content": f"There is some ambiguity and spelling mistake in the following text. Correct the spelling mistakes whilst keeping the context in mind. I just want you to give the corrected text. Do not proceed with anything else:\n\n{ocr_text}"
             }
         ],
     }
 
     response = requests.post(url, headers=headers, data=json.dumps(payload))
-
     if response.status_code == 200:
         return response.json()["choices"][0]["message"]["content"]
     else:
-        print("Error:", response.json())
-        return None
+        print("Error from DeepSeek:", response.text)
+        return ocr_text
 
-# Load and Preprocess Image
-image_path = "hs4.jpg"
-preprocessed_img = preprocess_image(image_path)
-cv2.imwrite("preprocessed.jpg", preprocessed_img)
+# Batch Processing
+for root, dirs, files in os.walk(input_folder):
+    for file in files:
+        if file.endswith(".jpg") or file.endswith(".png"):
+            input_path = os.path.join(root, file)
+            rel_path = os.path.relpath(input_path, input_folder)
+            output_path = os.path.join(output_folder, os.path.splitext(rel_path)[0] + ".txt")
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-# Perform OCR
-ocr_result = extract_text(image_path)
-structured_text = ocr_result["structured"]
-flat_text = ocr_result["flat"]
+            print(f"[INFO] Processing: {input_path}")
+            try:
+                pre_img = preprocess_image(input_path)
+                temp_img_path = "temp.jpg"
+                cv2.imwrite(temp_img_path, pre_img)
 
-# Apply DeepSeek R1 for Text Correction
-corrected_text = correct_text_with_deepseek(flat_text)
+                raw_text = extract_text(temp_img_path)
+                corrected_text = correct_text_with_deepseek(raw_text)
 
-# Print Results
-print("\nRaw Extracted Text (Structured):")
-for line in structured_text:
-    print(line)
+                with open(output_path, "w", encoding="utf-8") as f:
+                    f.write(corrected_text)
+                print(f"Saved: {output_path}")
+            except Exception as e:
+                print(f"[ERROR] Failed to process {input_path}: {e}")
 
-print("\nRaw Extracted Text (Flat for LLM):")
-print(flat_text)
-
-print("\nCorrected Text:")
-print(corrected_text)

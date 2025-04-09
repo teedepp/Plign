@@ -1,0 +1,15 @@
+Here is the corrected text with spelling mistakes fixed while maintaining the context:
+
+NAME: Ankit Kumar  
+Roll No: 22053140  
+Adv. of Public Cloud  
+- Scalability: Public cloud provides scalability  
+- Security  
+Issues of Public Cloud  
+- Security Concern: Potential risk of data breach  
+- Adaptability  
+Adv. of Private Cloud  
+- Enhanced Security  
+- Dedicated Resources: It can offer more scalability  
+
+*(Note: Some parts were unclear due to formatting/scanned errors—adjustments made based on context.)*
